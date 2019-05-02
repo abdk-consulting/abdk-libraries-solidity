@@ -1,7 +1,8 @@
 ABDK Math 64.64
 ===============
 
-Library of mathematical functions operating with signed 64.64-bit fixed point numbers.
+Library of mathematical functions operating with signed 64.64-bit fixed point
+numbers.
 
 Copyright (c) 2019, [ABDK Consulting](https://abdk.consulting/)
 
@@ -83,7 +84,7 @@ return the result as a signed 64.64 fixed point number.
 Average Values
 --------------
 
-Here are average functions.
+Here are average value functions.
 
     function avg (int128 x, int128 y) internal pure returns (int128)
 
@@ -127,13 +128,13 @@ the result as a signed 64.64 fixed point number.
 
     function exp_2 (int128 x) internal pure returns (int128)
 
-Raise 2 to the power of a signed 64.64 fixed point number, i.e. calculate `2^x`
-and return the result as a signed 64.64 fixed point number.
+Raise 2 to the power of a signed 64.64 fixed point number, i.e. calculate
+`2^x`, and return the result as a signed 64.64 fixed point number.
 
     function exp (int128 x) internal pure returns (int128)
 
-Exponentiate a signed 64.64 fixed point number, i.e. `e^x` and return the result
-as a signed 64.64 fixed point number.
+Exponentiate a signed 64.64 fixed point number, i.e. calculate `e^x`, and
+return the result as a signed 64.64 fixed point number.
 
 Conversions
 -----------
@@ -142,30 +143,30 @@ Here are conversion functions.
 
     function fromInt (int256 x) internal pure returns (int128)
 
-Convert a signed 256-bit integer number into a signed 64.64-bit fixed point
+Convert a signed 256 bit integer number into a signed 64.64 bit fixed point
 number.
 
     function toInt (int128 x) internal pure returns (int64)
 
-Convert a signed 64.64-bit fixed point number into a signed 64-bit integer
+Convert a signed 64.64 bit fixed point number into a signed 64 bit integer
 number.
 
     function fromUInt (uint256 x) internal pure returns (int128)
 
-Convert an unsigned 256-bit integer number into a signed 64.64-bit fixed point
+Convert an unsigned 256 bit integer number into a signed 64.64 bit fixed point
 number.
 
     function toUInt (int128 x) internal pure returns (uint64)
 
-Convert a signed 64.64-bit fixed point number into a unsigned 64-bit integer
+Convert a signed 64.64 bit fixed point number into a unsigned 64 bit integer
 number.
 
     function from128x128 (int256 x) internal pure returns (int128)
 
-Convert a signed 128.128-bit fixed point number into a signed 64.64-bit fixed
+Convert a signed 128.128 bit fixed point number into a signed 64.64 bit fixed
 point number.
 
     function to128x128 (int128 x) internal pure returns (int256)
 
-Convert a signed 64.64-bit fixed point number into a signed 128.128-bit fixed
+Convert a signed 64.64 bit fixed point number into a signed 128.128 bit fixed
 point number.
