@@ -366,31 +366,25 @@ library ABDKMath64x64 {
   function log_2 (int128 x) internal pure returns (int128) {
     require (x > 0);
 
-    int128 a = 0;
-    int128 b = 126;
-    while (a < b) {
-      int128 m = a + b >> 1;
-      int128 t = x >> m;
-      if (t == 0) b = m - 1;
-      else if (t > 1) a = m + 1;
-      else {
-        a = m;
-        break;
-      }
-    }
+    uint256 a = 0;
+    int128 y = x;
+    if (y >= 0x10000000000000000) {y >>= 64; a += 64;}
+    if (y >= 0x100000000) {y >>= 32; a += 32;}
+    if (y >= 0x10000) {y >>= 16; a += 16;}
+    if (y >= 0x100) {y >>= 8; a += 8;}
+    if (y >= 0x10) {y >>= 4; a += 4;}
+    if (y >= 0x4) {y >>= 2; a += 2;}
+    if (y >= 0x1) a += 1; // No need to shift y anymore
 
-    int128 result = a - 64 << 64;
+    uint256 result = a - 64 << 64;
     uint256 ux = uint256 (x) << 127 - a;
-    for (int128 bit = 0x8000000000000000; bit > 0; bit >>= 1) {
+    for (uint256 bit = 0x8000000000000000; bit > 0; bit >>= 1) {
       ux *= ux;
-      if (ux >=
-        0x8000000000000000000000000000000000000000000000000000000000000000) {
-        ux >>= 128;
-        result += bit;
-      } else ux >>= 127;
+      result |= ((ux >> 255) * bit);
+      ux >>= 127 + (ux >> 255);
     }
 
-    return result;
+    return int128(result);
   }
 
   /**
