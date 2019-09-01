@@ -911,20 +911,15 @@ library ABDKMathQuad {
           resultSignifier <<= shift;
           resultExponent -= shift;
         } else {
+          uint256 bb = resultNegative ? 1 : 0;
           while (resultSignifier < 0x10000000000000000000000000000) {
             resultSignifier <<= 1;
             resultExponent -= 1;
   
-            xSignifier = xSignifier * xSignifier;
-            if (xSignifier >= 0x8000000000000000000000000000000000000000000000000000000000000000) {
-              if (!resultNegative)
-                resultSignifier += 1;
-              xSignifier >>= 128;
-            } else {
-              if (resultNegative)
-                resultSignifier += 1;
-              xSignifier >>= 127;
-            }
+            xSignifier *= xSignifier;
+            uint256 b = xSignifier >> 255;
+            resultSignifier += b ^ bb;
+            xSignifier >>= 127 + b;
           }
         }
 
@@ -1145,19 +1140,17 @@ library ABDKMathQuad {
   function msb (uint256 x) private pure returns (uint256) {
     require (x > 0);
 
-    uint256 a = 0;
-    uint256 b = 255;
-    while (a < b) {
-      uint256 m = a + b >> 1;
-      uint256 t = x >> m;
-      if (t == 0) b = m - 1;
-      else if (t > 1) a = m + 1;
-      else {
-        a = m;
-        break;
-      }
-    }
+    uint256 result = 0;
 
-    return a;
+    if (x >= 0x100000000000000000000000000000000) { x >>= 128; result += 128; }
+    if (x >= 0x10000000000000000) { x >>= 64; result += 64; }
+    if (x >= 0x100000000) { x >>= 32; result += 32; }
+    if (x >= 0x10000) { x >>= 16; result += 16; }
+    if (x >= 0x100) { x >>= 8; result += 8; }
+    if (x >= 0x10) { x >>= 4; result += 4; }
+    if (x >= 0x4) { x >>= 2; result += 2; }
+    if (x >= 0x2) result += 1; // No need to shift x anymore
+
+    return result;
   }
 }
