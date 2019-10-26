@@ -580,20 +580,16 @@ library ABDKMath64x64 {
     if (x <= 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
       result = (x << 64) / y;
     else {
-      uint256 a = 192;
-      uint256 b = 255;
-      while (a < b) {
-        uint256 m = a + b >> 1;
-        uint256 t = x >> m;
-        if (t == 0) b = m - 1;
-        else if (t > 1) a = m + 1;
-        else {
-          a = m;
-          break;
-        }
-      }
+      uint256 msb = 192;
+      uint256 xc = x >> 192;
+      if (xc >= 0x100000000) { xc >>= 32; msb += 32; }
+      if (xc >= 0x10000) { xc >>= 16; msb += 16; }
+      if (xc >= 0x100) { xc >>= 8; msb += 8; }
+      if (xc >= 0x10) { xc >>= 4; msb += 4; }
+      if (xc >= 0x4) { xc >>= 2; msb += 2; }
+      if (xc >= 0x2) msb += 1;  // No need to shift xc anymore
 
-      result = (x << 255 - a) / ((y - 1 >> a - 191) + 1);
+      result = (x << 255 - msb) / ((y - 1 >> msb - 191) + 1);
       require (result <= 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
 
       uint256 hi = result * (y >> 128);
@@ -629,20 +625,18 @@ library ABDKMath64x64 {
     if (y == 0) return 0x80000000000000000000000000000000;
     else if (x == 0) return 0;
     else {
-      uint256 a = 0;
-      uint256 b = 255;
-      while (a < b) {
-        uint256 m = a + b >> 1;
-        uint256 t = x >> m;
-        if (t == 0) b = m - 1;
-        else if (t > 1) a = m + 1;
-        else {
-          a = m;
-          break;
-        }
-      }
+      int256 msb = 0;
+      uint256 xc = x;
+      if (xc >= 0x100000000000000000000000000000000) { xc >>= 128; msb += 128; }
+      if (xc >= 0x10000000000000000) { xc >>= 64; msb += 64; }
+      if (xc >= 0x100000000) { xc >>= 32; msb += 32; }
+      if (xc >= 0x10000) { xc >>= 16; msb += 16; }
+      if (xc >= 0x100) { xc >>= 8; msb += 8; }
+      if (xc >= 0x10) { xc >>= 4; msb += 4; }
+      if (xc >= 0x4) { xc >>= 2; msb += 2; }
+      if (xc >= 0x2) msb += 1;  // No need to shift xc anymore
 
-      int256 xe = int256 (a) - 127;
+      int256 xe = msb - 127;
       if (xe > 0) x >>= xe;
       else x <<= -xe;
 
