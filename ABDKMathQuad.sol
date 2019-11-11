@@ -1130,6 +1130,60 @@ library ABDKMathQuad {
     return pow_2 (mul (x, 0x3FFF71547652B82FE1777D0FFDA0D23A));
   }
 
+
+  /**
+   * Calculate approximate root using a variation of Carmack's fast inverted 
+   * square root generalized for exponents between 0 and 1
+   * 
+   * @param base quadruple precision number
+   * @param root uint256 
+   * @return quadruple precision number
+   */
+  function aprx_root (bytes16 base, uint256 root) internal pure returns (bytes16) {
+
+    bytes16 root_constant = div(fromUInt(root - 1), fromUInt(root));
+    root_constant = mul(bytes16(0x407cfff7a3bea91d9b1b79d909f1f149), root_constant);
+    return bytes16( uint128(toUInt(root_constant)) + (uint128(base) / uint128(root)));
+
+  }
+
+
+  /**
+   * Newton's method for approximating square roots. Returns the guess 
+   * if maximum number of iterations has been reached or returns guess 
+   * if it is equal to the base the root is being derived on.
+   * Newton's formula for a single iteration is
+   * guess' = guess - (guess^exponent - base) / (exponent * guess^(exponent - 1);
+   *
+   * @param guess quadruple precision number 
+   * @param base quadruple precision number 
+   * @param root uint256
+   * @param max_iterations uint256
+   */
+
+  function find_root (bytes16 guess, bytes16 base, uint256 root, uint256 max_iterations) public pure returns (bytes16) {
+
+    for (uint i = 0; i < max_iterations; i++) {
+
+      if (eq(guess, base)) return guess;
+
+      bytes16 divisor_lhs = guess;
+      bytes16 divisor_rhs = fromUInt(root);
+      for (uint j = 1; j < root - 1; j++) divisor_lhs = mul(divisor_lhs, guess);
+      bytes16 dividend_lhs = mul(divisor_lhs, guess);
+      bytes16 rhs_quotient = div(
+        sub(dividend_lhs, base),
+        mul(divisor_lhs, divisor_rhs)
+      );
+
+      guess = sub(guess, rhs_quotient);
+
+    }
+
+    return guess;
+
+  }
+
   /**
    * Get index of the most significant non-zero bit in binary representation of
    * x.  Reverts if x is zero.
