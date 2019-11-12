@@ -1164,13 +1164,18 @@ library ABDKMathQuad {
   function find_root (bytes16 guess, bytes16 base, uint256 root, uint256 max_iterations) public pure returns (bytes16) {
 
     for (uint i = 0; i < max_iterations; i++) {
-
-      if (eq(guess, base)) return guess;
-
+      
       bytes16 divisor_lhs = guess;
       bytes16 divisor_rhs = fromUInt(root);
+
       for (uint j = 1; j < root - 1; j++) divisor_lhs = mul(divisor_lhs, guess);
       bytes16 dividend_lhs = mul(divisor_lhs, guess);
+
+      if (eq(dividend_lhs, base)) return guess; // best way to check for convergence - guess ^ root == base?
+
+      bytes16 dividend = sub(dividend_lhs, base);
+      bytes16 divisor = mul(divisor_lhs, divisor_rhs);
+
       bytes16 rhs_quotient = div(
         sub(dividend_lhs, base),
         mul(divisor_lhs, divisor_rhs)
