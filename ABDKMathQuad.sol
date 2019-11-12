@@ -1142,7 +1142,7 @@ library ABDKMathQuad {
   function fast_aprx_root (bytes16 base, uint256 root) internal pure returns (bytes16) {
 
     bytes16 root_constant = div(fromUInt(root - 1), fromUInt(root));
-    root_constant = mul(bytes16(0x407cfff7a3bea91d9b1b79d909f1f149), root_constant);
+    root_constant = mul(root_constant, bytes16(0x407cfff7a3bea91d9b1b79d909f1f149));
     return bytes16( uint128(toUInt(root_constant)) + (uint128(base) / uint128(root)));
 
   }
