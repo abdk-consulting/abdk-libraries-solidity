@@ -1165,11 +1165,11 @@ library ABDKMathQuad {
 
     for (uint i = 0; i < max_iterations; i++) {
       
-      bytes16 divisor_lhs = guess;
-      bytes16 divisor_rhs = fromUInt(root);
+      bytes16 divisor_rhs = guess;
+      bytes16 divisor_lhs = fromUInt(root);
 
-      for (uint j = 1; j < root - 1; j++) divisor_lhs = mul(divisor_lhs, guess);
-      bytes16 dividend_lhs = mul(divisor_lhs, guess);
+      for (uint j = 1; j < root - 1; j++) divisor_rhs = mul(divisor_rhs, guess);
+      bytes16 dividend_lhs = mul(divisor_rhs, guess);
 
       if (eq(dividend_lhs, base)) return guess; // best way to check for convergence - guess ^ root == base?
 
