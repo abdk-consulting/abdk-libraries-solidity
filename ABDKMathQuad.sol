@@ -1,8 +1,9 @@
+// SPDX-License-Identifier: BSD-4-Clause
 /*
  * ABDK Math Quad Smart Contract Library.  Copyright © 2019 by ABDK Consulting.
  * Author: Mikhail Vladimirov <mikhail.vladimirov@gmail.com>
  */
-pragma solidity ^0.5.0 || ^0.6.0;
+pragma solidity ^0.5.0 || ^0.6.0 || ^0.7.0;
 
 /**
  * Smart contract library of mathematical functions operating with IEEE 754
@@ -11,27 +12,27 @@ pragma solidity ^0.5.0 || ^0.6.0;
  * represented by bytes16 type.
  */
 library ABDKMathQuad {
-  /**
+  /*
    * 0.
    */
   bytes16 private constant POSITIVE_ZERO = 0x00000000000000000000000000000000;
 
-  /**
+  /*
    * -0.
    */
   bytes16 private constant NEGATIVE_ZERO = 0x80000000000000000000000000000000;
 
-  /**
+  /*
    * +Infinity.
    */
   bytes16 private constant POSITIVE_INFINITY = 0x7FFF0000000000000000000000000000;
 
-  /**
+  /*
    * -Infinity.
    */
   bytes16 private constant NEGATIVE_INFINITY = 0xFFFF0000000000000000000000000000;
 
-  /**
+  /*
    * Canonical NaN value.
    */
   bytes16 private constant NaN = 0x7FFF8000000000000000000000000000;
@@ -506,10 +507,10 @@ library ABDKMathQuad {
   
         if (xSign == ySign) {
           if (delta > 112) return x;
-          else if (delta > 0) ySignifier >>= delta;
+          else if (delta > 0) ySignifier >>= uint256 (delta);
           else if (delta < -112) return y;
           else if (delta < 0) {
-            xSignifier >>= -delta;
+            xSignifier >>= uint256 (-delta);
             xExponent = yExponent;
           }
   
@@ -541,9 +542,9 @@ library ABDKMathQuad {
           }
 
           if (delta > 112) ySignifier = 1;
-          else if (delta > 1) ySignifier = (ySignifier - 1 >> delta - 1) + 1;
+          else if (delta > 1) ySignifier = (ySignifier - 1 >> uint256 (delta - 1)) + 1;
           else if (delta < -112) xSignifier = 1;
-          else if (delta < -1) xSignifier = (xSignifier - 1 >> -delta - 1) + 1;
+          else if (delta < -1) xSignifier = (xSignifier - 1 >> uint256 (-delta - 1)) + 1;
 
           if (xSignifier >= ySignifier) xSignifier -= ySignifier;
           else {
@@ -851,15 +852,15 @@ library ABDKMathQuad {
         }
 
         uint256 r = 0x10000000000000000000000000000;
-        while (true) {
-          uint256 rr = xSignifier / r;
-          if (r == rr || r + 1 == rr) break;
-          else if (r == rr + 1) {
-            r = rr;
-            break;
-          }
-          r = r + rr + 1 >> 1;
-        }
+        r = (r + xSignifier / r) >> 1;
+        r = (r + xSignifier / r) >> 1;
+        r = (r + xSignifier / r) >> 1;
+        r = (r + xSignifier / r) >> 1;
+        r = (r + xSignifier / r) >> 1;
+        r = (r + xSignifier / r) >> 1;
+        r = (r + xSignifier / r) >> 1; // Seven iterations should be enough
+        uint256 r1 = xSignifier / r;
+        if (r1 < r) r = r1;
 
         return bytes16 (uint128 (xExponent << 112 | r & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFF));
       }

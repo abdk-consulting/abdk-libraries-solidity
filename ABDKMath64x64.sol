@@ -1,8 +1,9 @@
+// SPDX-License-Identifier: BSD-4-Clause
 /*
  * ABDK Math 64.64 Smart Contract Library.  Copyright © 2019 by ABDK Consulting.
  * Author: Mikhail Vladimirov <mikhail.vladimirov@gmail.com>
  */
-pragma solidity ^0.5.0 || ^0.6.0;
+pragma solidity ^0.5.0 || ^0.6.0 || ^0.7.0;
 
 /**
  * Smart contract library of mathematical functions operating with signed
@@ -13,12 +14,12 @@ pragma solidity ^0.5.0 || ^0.6.0;
  * represented by int128 type holding only the numerator.
  */
 library ABDKMath64x64 {
-  /**
+  /*
    * Minimum value signed 64.64-bit fixed point number may have. 
    */
   int128 private constant MIN_64x64 = -0x80000000000000000000000000000000;
 
-  /**
+  /*
    * Maximum value signed 64.64-bit fixed point number may have. 
    */
   int128 private constant MAX_64x64 = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
@@ -313,7 +314,7 @@ library ABDKMath64x64 {
     require (m >= 0);
     require (m <
         0x4000000000000000000000000000000000000000000000000000000000000000);
-    return int128 (sqrtu (uint256 (m), uint256 (x) + uint256 (y) >> 1));
+    return int128 (sqrtu (uint256 (m)));
   }
 
   /**
@@ -354,7 +355,7 @@ library ABDKMath64x64 {
    */
   function sqrt (int128 x) internal pure returns (int128) {
     require (x >= 0);
-    return int128 (sqrtu (uint256 (x) << 64, 0x10000000000000000));
+    return int128 (sqrtu (uint256 (x) << 64));
   }
 
   /**
@@ -377,7 +378,7 @@ library ABDKMath64x64 {
     if (xc >= 0x2) msb += 1;  // No need to shift xc anymore
 
     int256 result = msb - 64 << 64;
-    uint256 ux = uint256 (x) << 127 - msb;
+    uint256 ux = uint256 (x) << uint256 (127 - msb);
     for (int256 bit = 0x8000000000000000; bit > 0; bit >>= 1) {
       ux *= ux;
       uint256 b = ux >> 255;
@@ -543,7 +544,7 @@ library ABDKMath64x64 {
     if (x & 0x1 > 0)
       result = result * 0x10000000000000000B17217F7D1CF79AB >> 128;
 
-    result >>= 63 - (x >> 64);
+    result >>= uint256 (63 - (x >> 64));
     require (result <= uint256 (MAX_64x64));
 
     return int128 (result);
@@ -637,8 +638,8 @@ library ABDKMath64x64 {
       if (xc >= 0x2) msb += 1;  // No need to shift xc anymore
 
       int256 xe = msb - 127;
-      if (xe > 0) x >>= xe;
-      else x <<= -xe;
+      if (xe > 0) x >>= uint256 (xe);
+      else x <<= uint256 (-xe);
 
       uint256 result = 0x80000000000000000000000000000000;
       int256 re = 0;
@@ -669,8 +670,8 @@ library ABDKMath64x64 {
         }
       }
 
-      if (re > 0) result <<= re;
-      else if (re < 0) result >>= -re;
+      if (re > 0) result <<= uint256 (re);
+      else if (re < 0) result >>= uint256 (-re);
 
       return result;
     }
@@ -683,16 +684,27 @@ library ABDKMath64x64 {
    * @param x unsigned 256-bit integer number
    * @return unsigned 128-bit integer number
    */
-  function sqrtu (uint256 x, uint256 r) private pure returns (uint128) {
+  function sqrtu (uint256 x) private pure returns (uint128) {
     if (x == 0) return 0;
     else {
-      require (r > 0);
-      while (true) {
-        uint256 rr = x / r;
-        if (r == rr || r + 1 == rr) return uint128 (r);
-        else if (r == rr + 1) return uint128 (rr);
-        r = r + rr + 1 >> 1;
-      }
+      uint256 xx = x;
+      uint256 r = 1;
+      if (xx >= 0x100000000000000000000000000000000) { xx >>= 128; r <<= 64; }
+      if (xx >= 0x10000000000000000) { xx >>= 64; r <<= 32; }
+      if (xx >= 0x100000000) { xx >>= 32; r <<= 16; }
+      if (xx >= 0x10000) { xx >>= 16; r <<= 8; }
+      if (xx >= 0x100) { xx >>= 8; r <<= 4; }
+      if (xx >= 0x10) { xx >>= 4; r <<= 2; }
+      if (xx >= 0x8) { r <<= 1; }
+      r = (r + x / r) >> 1;
+      r = (r + x / r) >> 1;
+      r = (r + x / r) >> 1;
+      r = (r + x / r) >> 1;
+      r = (r + x / r) >> 1;
+      r = (r + x / r) >> 1;
+      r = (r + x / r) >> 1; // Seven iterations should be enough
+      uint256 r1 = x / r;
+      return uint128 (r < r1 ? r : r1);
     }
   }
 }
