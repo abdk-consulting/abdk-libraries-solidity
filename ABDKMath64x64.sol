@@ -736,7 +736,7 @@ library ABDKMath64x64 {
         if (xx >= 0x10000) { xx >>= 16; r <<= 8; }
         if (xx >= 0x100) { xx >>= 8; r <<= 4; }
         if (xx >= 0x10) { xx >>= 4; r <<= 2; }
-        if (xx >= 0x8) { r <<= 1; }
+        if (xx >= 0x4) { r <<= 1; }
         r = (r + x / r) >> 1;
         r = (r + x / r) >> 1;
         r = (r + x / r) >> 1;
